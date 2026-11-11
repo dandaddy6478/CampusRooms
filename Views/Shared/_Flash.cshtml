@@ -1,0 +1,5 @@
+@* A one-time message from TempData, shown on whatever page comes next *@
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}

@@ -1,0 +1,21 @@
+@model Room
+
+<tr>
+    <td><a asp-controller="Rooms" asp-action="Details" asp-route-id="@Model.Id">@Model.Code</a></td>
+    <td>@Model.Name</td>
+    <td>@Model.Seats</td>
+    <td>
+        @if (Model.HasProjector)
+        {
+            <span class="badge bg-success">Projector</span>
+        }
+        else
+        {
+            <span class="text-muted">none</span>
+        }
+    </td>
+    <td>
+        <a asp-controller="Rooms" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+        <a class="text-danger ms-2" asp-controller="Rooms" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
+    </td>
+</tr>

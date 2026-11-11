@@ -1,0 +1,21 @@
+@model Room
+
+<h1>@Model.Code: @Model.Name</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Seats</dt>
+    <dd class="col-sm-9">@Model.Seats</dd>
+    <dt class="col-sm-3">Projector</dt>
+    <dd class="col-sm-9">
+        @if (Model.HasProjector)
+        {
+            <span>Yes</span>
+        }
+        else
+        {
+            <span>No</span>
+        }
+    </dd>
+</dl>
+
+<a asp-controller="Rooms" asp-action="Index">All rooms</a>
