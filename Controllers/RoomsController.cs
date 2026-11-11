@@ -2,6 +2,7 @@ using CampusRooms.Data;
 using CampusRooms.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CampusRooms.Controllers
 {
@@ -15,13 +16,37 @@ namespace CampusRooms.Controllers
             _db = db;
         }
 
+        private void LoadBuildings(int? selectedId = null)
+        {
+            var buildings = _db.Buildings.OrderBy(b => b.Name).ToList();
+            ViewBag.Buildings = new SelectList(buildings, "Id", "Name", selectedId);
+        }
+
         // GET /rooms: every room, sorted by code
         [HttpGet("rooms")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             ViewData["Title"] = "Rooms";
-            List<Room> rooms = _db.Rooms.OrderBy(room => room.Code).ToList();
+            var rooms = await _db.Rooms
+    .Include(r => r.Building)
+    .OrderBy(r => r.Code)
+    .ToListAsync();
             ViewBag.Count = rooms.Count;
+            return View(rooms);
+        }
+
+        // GET /rooms/seats/30: rooms with at least 30 seats, largest first
+        [HttpGet("rooms/seats/{min:int}")]
+        public IActionResult Seats(int min)
+        {
+            List<Room> rooms = _db.Rooms
+                .FromSql($"SELECT * FROM Rooms WHERE Seats >= {min}")
+                .Include(r => r.Building)
+                .OrderByDescending(r => r.Seats)
+                .ToList();
+
+            ViewData["Title"] = $"Rooms with at least {min} seats";
+            ViewBag.Min = min;
             return View(rooms);
         }
 
@@ -29,7 +54,7 @@ namespace CampusRooms.Controllers
         [HttpGet("rooms/{id:int}")]
         public IActionResult Details(int id)
         {
-            Room? room = _db.Rooms.Find(id);
+            Room? room = _db.Rooms.Include(r => r.Building).FirstOrDefault(r => r.Id == id);
             if (room == null)
             {
                 return NotFound();
@@ -43,6 +68,7 @@ namespace CampusRooms.Controllers
         public IActionResult Add()
         {
             ViewData["Title"] = "Add a room";
+            LoadBuildings();
             return View(new Room());
         }
 
@@ -51,9 +77,15 @@ namespace CampusRooms.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Add(Room new_room)
         {
+            if (new_room.BuildingId == null)
+            {
+                ModelState.AddModelError(nameof(Room.BuildingId), "Pick a building");
+            }
+
             if (!ModelState.IsValid)
             {
                 ViewData["Title"] = "Add a room";
+                LoadBuildings(new_room.BuildingId);
                 return View(new_room);
             }
 
@@ -67,6 +99,7 @@ namespace CampusRooms.Controllers
                 // The unique index on Code said no
                 ModelState.AddModelError("Code", "Another room already has that code");
                 ViewData["Title"] = "Add a room";
+                LoadBuildings(new_room.BuildingId);
                 return View(new_room);
             }
 
@@ -84,7 +117,8 @@ namespace CampusRooms.Controllers
                 return NotFound();
             }
             ViewData["Title"] = "Edit a room";
-            return View(room);
+                LoadBuildings(room.BuildingId);
+                return View(room);
         }
 
         // POST /rooms/edit/2: save the changes to the same row
@@ -92,13 +126,42 @@ namespace CampusRooms.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Room changed_room)
         {
+                if (changed_room.BuildingId == null)
+                {
+                    ModelState.AddModelError(nameof(Room.BuildingId), "Pick a building");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    ViewData["Title"] = "Edit a room";
+                    LoadBuildings(changed_room.BuildingId);
+                    return View(changed_room);
+                }
+
             if (!ModelState.IsValid)
             {
                 ViewData["Title"] = "Edit a room";
+                LoadBuildings(changed_room.BuildingId);
+                return View(changed_room);
+            }
+            if (!ModelState.IsValid)
+            {
+                ViewData["Title"] = "Edit a room";
+                LoadBuildings(changed_room.BuildingId);
                 return View(changed_room);
             }
 
             Room? room = _db.Rooms.Find(id);
+            if (room == null)
+            {
+                TempData["Message"] = "That room was deleted before you saved";
+                return RedirectToAction("Index");
+            }
+            room.Code = changed_room.Code;
+            room.Name = changed_room.Name;
+            room.Seats = changed_room.Seats;
+            room.HasProjector = changed_room.HasProjector; room.Name = changed_room.Name;
+            _ = _db.Rooms.Find(id);
             if (room == null)
             {
                 TempData["Message"] = "That room was deleted before you saved";

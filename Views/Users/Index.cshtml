@@ -1,0 +1,28 @@
+﻿@model List<CampusRooms.Controllers.UserRow>
+
+<h1>Users</h1>
+
+<table class="table">
+    <tr>
+        <th>Email</th>
+        <th></th>
+    </tr>
+    @foreach (var u in Model)
+    {
+        <tr>
+            <td>@u.Email</td>
+            <td>
+                @if (u.IsStaff)
+                {
+                    <span class="badge bg-secondary">Staff</span>
+                }
+                else
+                {
+                    <form method="post" asp-controller="Users" asp-action="MakeStaff" asp-route-id="@u.Id">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Make staff</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+</table>

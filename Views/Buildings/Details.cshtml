@@ -1,0 +1,28 @@
+﻿@model CampusRooms.Models.Building
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<h1>@Model.Name</h1>
+
+@if (!Model.Rooms.Any())
+{
+    <p>No rooms in @Model.Name yet</p>
+}
+else
+{
+    <table class="table">
+        <thead><tr><th>Code</th><th>Name</th><th>Seats</th></tr></thead>
+        <tbody>
+            @foreach (var r in Model.Rooms)
+            {
+                <tr>
+                    <td>@r.Code</td>
+                    <td><a asp-controller="Rooms" asp-action="Details" asp-route-id="@r.Id">@r.Name</a></td>
+                    <td>@r.Seats</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<a asp-controller="Rooms" asp-action="Index">Back to rooms</a>

@@ -15,6 +15,12 @@
         }
     </td>
     <td>
+        @if (Model.Building != null)
+        {
+            <a asp-controller="Buildings" asp-action="Details" asp-route-id="@Model.Building.Id">@Model.Building.Name</a>
+        }
+    </td>
+    <td>
         <a asp-controller="Rooms" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
         <a class="text-danger ms-2" asp-controller="Rooms" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
     </td>

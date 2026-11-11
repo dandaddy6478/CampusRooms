@@ -1,0 +1,99 @@
+@host = https://localhost:7123
+
+### 1. List all rooms. Expect 200, five rooms
+GET {{host}}/api/rooms
+
+### 2. One room. Expect 200
+GET {{host}}/api/rooms/3
+
+### 3. A room that doesn't exist. Expect 404
+GET {{host}}/api/rooms/99
+
+### 4. Add a room. Expect 201 + Location
+POST {{host}}/api/rooms
+Content-Type: application/json
+
+{
+  "code": "MB-310",
+  "name": "Lecture Theatre B",
+  "seats": 80,
+  "hasProjector": true,
+  "buildingId": 1
+}
+
+### 5. Same code again. Expect 409
+POST {{host}}/api/rooms
+Content-Type: application/json
+
+{
+  "code": "MB-310",
+  "name": "Lecture Theatre B",
+  "seats": 80,
+  "hasProjector": true,
+  "buildingId": 1
+}
+
+### 6. Empty code and 0 seats. Expect 400, both messages
+POST {{host}}/api/rooms
+Content-Type: application/json
+
+{
+  "code": "",
+  "name": "Bad Room",
+  "seats": 0,
+  "hasProjector": false,
+  "buildingId": 1
+}
+
+### 7. Correct body, no Content-Type. Expect 415
+POST {{host}}/api/rooms
+
+{
+  "code": "MB-311",
+  "name": "Lecture Theatre C",
+  "seats": 60,
+  "hasProjector": true,
+  "buildingId": 1
+}
+
+### 8. Change room 2 to 32 seats. Expect 204
+PUT {{host}}/api/rooms/2
+Content-Type: application/json
+
+{
+  "code": "MB-204",
+  "name": "Seminar Room",
+  "seats": 32,
+  "hasProjector": false,
+  "buildingId": 1
+}
+
+### 9. Room 2 with room 1's code. Expect 409
+PUT {{host}}/api/rooms/2
+Content-Type: application/json
+
+{
+  "code": "MB-101",
+  "name": "Seminar Room",
+  "seats": 32,
+  "hasProjector": false,
+  "buildingId": 1
+}
+
+### 10. PUT a room that doesn't exist. Expect 404
+PUT {{host}}/api/rooms/99
+Content-Type: application/json
+
+{
+  "code": "ZZ-001",
+  "name": "Nowhere",
+  "seats": 10,
+  "hasProjector": false,
+  "buildingId": 1
+}
+
+### 11. Delete room 5. Expect 204
+DELETE {{host}}/api/rooms/5
+
+### 12. Delete room 5 again. Expect 404
+DELETE {{host}}/api/rooms/5
