@@ -24,5 +24,7 @@ namespace CampusRooms.Models
 
         [Display(Name = "Has a projector?")]
         public bool HasProjector { get; set; }
+        public int? BuildingId { get; set; }
+        public Building? Building { get; set; }
     }
 }

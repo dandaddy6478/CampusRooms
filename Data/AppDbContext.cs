@@ -11,10 +11,16 @@ namespace CampusRooms.Data
         }
 
         public DbSet<Room> Rooms { get; set; }
+        public DbSet<Building> Buildings => Set<Building>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Building>().HasData(
+    new Building { Id = 1, Name = "Main Block" },
+    new Building { Id = 2, Name = "Science Block" },
+    new Building { Id = 3, Name = "Library" },
+    new Building { Id = 4, Name = "Sports Complex" });
 
             // Five rooms already in the database when it is made
             modelBuilder.Entity<Room>().HasData(
